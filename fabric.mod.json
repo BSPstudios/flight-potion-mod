@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "id": "wFib7Ix7",
+  "version": "1.0.1splashshot2",
+  "name": "BSP's potion mod",
+  "description": "这个模组加入了很多药水，比如飞行药水和防中毒药水 This mod added many potion,like flight.",
+  "authors": ["BSPsdudio"],
+  "license": "ARR",
+  "environment": "*",
+  "entrypoints": {
+    "main": ["com.flightpotion.FlightPotionMod"]
+  },
+  "depends": {
+    "fabricloader": ">=0.16.9",
+    "minecraft": ">=1.21.9",
+    "fabric-api": "*"
+  }
+}
