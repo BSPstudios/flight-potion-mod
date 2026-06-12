@@ -8,6 +8,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectCategory;
 import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffectRemovalReason;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Items;
@@ -46,7 +47,7 @@ public class FlightPotionMod implements ModInitializer {
                 }
 
                 @Override
-                public void onMobRemoved(LivingEntity entity, int amplifier, MobEffectInstance.Callback callback) {
+                public void onMobRemoved(LivingEntity entity, int amplifier, MobEffectRemovalReason reason) {
                     if (entity instanceof Player player && !player.isCreative() && !player.isSpectator()) {
                         player.getAbilities().mayfly = false;
                         player.getAbilities().flying = false;
@@ -54,7 +55,7 @@ public class FlightPotionMod implements ModInitializer {
                         player.fallDistance = 0.0F;
                         player.onUpdateAbilities();
                     }
-                    super.onMobRemoved(entity, amplifier, callback);
+                    super.onMobRemoved(entity, amplifier, reason);
                 }
             }
     );
@@ -86,11 +87,11 @@ public class FlightPotionMod implements ModInitializer {
 
     @Override
     public void onInitialize() {
-        // 使用 .value() 获取实际的 Potion 对象
-        PotionBrewing.addMix(Potions.AWKWARD, Items.NETHER_STAR, FLIGHT_POTION.value());
-        PotionBrewing.addMix(FLIGHT_POTION.value(), Items.REDSTONE, LONG_FLIGHT_POTION.value());
-        PotionBrewing.addMix(FLIGHT_POTION.value(), Items.GLOWSTONE_DUST, STRONG_FLIGHT_POTION.value());
-        PotionBrewing.addMix(STRONG_FLIGHT_POTION.value(), Items.REDSTONE, LONG_STRONG_FLIGHT_POTION.value());
-        PotionBrewing.addMix(LONG_FLIGHT_POTION.value(), Items.GLOWSTONE_DUST, LONG_STRONG_FLIGHT_POTION.value());
+        // 直接传入 Holder<Potion>，这是 1.21.1 支持的签名
+        PotionBrewing.addMix(Potions.AWKWARD, Items.NETHER_STAR, FLIGHT_POTION);
+        PotionBrewing.addMix(FLIGHT_POTION, Items.REDSTONE, LONG_FLIGHT_POTION);
+        PotionBrewing.addMix(FLIGHT_POTION, Items.GLOWSTONE_DUST, STRONG_FLIGHT_POTION);
+        PotionBrewing.addMix(STRONG_FLIGHT_POTION, Items.REDSTONE, LONG_STRONG_FLIGHT_POTION);
+        PotionBrewing.addMix(LONG_FLIGHT_POTION, Items.GLOWSTONE_DUST, LONG_STRONG_FLIGHT_POTION);
     }
 }
