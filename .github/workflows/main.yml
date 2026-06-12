@@ -15,9 +15,9 @@ jobs:
     - name: Setup Gradle
       uses: gradle/actions/setup-gradle@v3
       with:
-        gradle-version: 8.10          # 这里指定 Gradle 版本
+        gradle-version: '8.10.2'   # 兼容 JDK 21 的稳定版本
     - name: Build
-      run: gradle build               # 直接用 gradle 命令，不再用 ./gradlew
+      run: gradle build
     - name: Upload artifact
       uses: actions/upload-artifact@v4
       with:
