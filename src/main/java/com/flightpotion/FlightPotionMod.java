@@ -1,6 +1,8 @@
 package com.flightpotion;
 
 import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.registry.FabricBrewingRecipeRegistry;
+import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
@@ -11,12 +13,12 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.Potion;
-import net.minecraft.world.item.alchemy.PotionBrewing;
 import net.minecraft.world.item.alchemy.Potions;
 
 public class FlightPotionMod implements ModInitializer {
 
-    public static final MobEffect FLIGHT_EFFECT = Registry.register(
+    // 飞行效果（返回 Holder<MobEffect>）
+    public static final Holder<MobEffect> FLIGHT_EFFECT = Registry.registerForHolder(
             BuiltInRegistries.MOB_EFFECT,
             ResourceLocation.fromNamespaceAndPath("bsp", "flight"),
             new MobEffect(MobEffectCategory.BENEFICIAL, 0x4FCCE8) {
@@ -44,7 +46,7 @@ public class FlightPotionMod implements ModInitializer {
                 }
 
                 @Override
-                public void onEffectRemoved(LivingEntity entity, int amplifier) {
+                public void onMobRemoved(LivingEntity entity, int amplifier, MobEffectInstance.Callback callback) {
                     if (entity instanceof Player player && !player.isCreative() && !player.isSpectator()) {
                         player.getAbilities().mayfly = false;
                         player.getAbilities().flying = false;
@@ -52,33 +54,31 @@ public class FlightPotionMod implements ModInitializer {
                         player.fallDistance = 0.0F;
                         player.onUpdateAbilities();
                     }
+                    super.onMobRemoved(entity, amplifier, callback);
                 }
             }
     );
 
-    // 普通版：飞行 I，180秒
-    public static final Potion FLIGHT_POTION = Registry.register(
+    // 药水（返回 Holder<Potion>）
+    public static final Holder<Potion> FLIGHT_POTION = Registry.registerForHolder(
             BuiltInRegistries.POTION,
             ResourceLocation.fromNamespaceAndPath("bsp", "flight_potion"),
             new Potion(new MobEffectInstance(FLIGHT_EFFECT, 3600))
     );
 
-    // 加长版：飞行 I，900秒
-    public static final Potion LONG_FLIGHT_POTION = Registry.register(
+    public static final Holder<Potion> LONG_FLIGHT_POTION = Registry.registerForHolder(
             BuiltInRegistries.POTION,
             ResourceLocation.fromNamespaceAndPath("bsp", "long_flight_potion"),
             new Potion(new MobEffectInstance(FLIGHT_EFFECT, 18000))
     );
 
-    // 增强版：飞行 II，180秒
-    public static final Potion STRONG_FLIGHT_POTION = Registry.register(
+    public static final Holder<Potion> STRONG_FLIGHT_POTION = Registry.registerForHolder(
             BuiltInRegistries.POTION,
             ResourceLocation.fromNamespaceAndPath("bsp", "strong_flight_potion"),
             new Potion(new MobEffectInstance(FLIGHT_EFFECT, 3600, 1))
     );
 
-    // 加长+增强版：飞行 II，900秒
-    public static final Potion LONG_STRONG_FLIGHT_POTION = Registry.register(
+    public static final Holder<Potion> LONG_STRONG_FLIGHT_POTION = Registry.registerForHolder(
             BuiltInRegistries.POTION,
             ResourceLocation.fromNamespaceAndPath("bsp", "long_strong_flight_potion"),
             new Potion(new MobEffectInstance(FLIGHT_EFFECT, 18000, 1))
@@ -86,15 +86,10 @@ public class FlightPotionMod implements ModInitializer {
 
     @Override
     public void onInitialize() {
-        // 粗制的药水 + 下界之星 → 飞行药水
-        PotionBrewing.addMix(Potions.AWKWARD, Items.NETHER_STAR, FLIGHT_POTION);
-        // 飞行药水 + 红石粉 → 加长飞行药水
-        PotionBrewing.addMix(FLIGHT_POTION, Items.REDSTONE, LONG_FLIGHT_POTION);
-        // 飞行药水 + 萤石粉 → 增强飞行药水
-        PotionBrewing.addMix(FLIGHT_POTION, Items.GLOWSTONE_DUST, STRONG_FLIGHT_POTION);
-        // 增强飞行药水 + 红石粉 → 加长增强飞行药水
-        PotionBrewing.addMix(STRONG_FLIGHT_POTION, Items.REDSTONE, LONG_STRONG_FLIGHT_POTION);
-        // 加长飞行药水 + 萤石粉 → 加长增强飞行药水
-        PotionBrewing.addMix(LONG_FLIGHT_POTION, Items.GLOWSTONE_DUST, LONG_STRONG_FLIGHT_POTION);
+        FabricBrewingRecipeRegistry.registerPotionRecipe(Potions.AWKWARD, Items.NETHER_STAR, FLIGHT_POTION);
+        FabricBrewingRecipeRegistry.registerPotionRecipe(FLIGHT_POTION, Items.REDSTONE, LONG_FLIGHT_POTION);
+        FabricBrewingRecipeRegistry.registerPotionRecipe(FLIGHT_POTION, Items.GLOWSTONE_DUST, STRONG_FLIGHT_POTION);
+        FabricBrewingRecipeRegistry.registerPotionRecipe(STRONG_FLIGHT_POTION, Items.REDSTONE, LONG_STRONG_FLIGHT_POTION);
+        FabricBrewingRecipeRegistry.registerPotionRecipe(LONG_FLIGHT_POTION, Items.GLOWSTONE_DUST, LONG_STRONG_FLIGHT_POTION);
     }
 }
