@@ -8,7 +8,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectCategory;
 import net.minecraft.world.effect.MobEffectInstance;
-import net.minecraft.world.effect.MobEffectRemovalReason;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Items;
@@ -18,7 +17,6 @@ import net.minecraft.world.item.alchemy.Potions;
 
 public class FlightPotionMod implements ModInitializer {
 
-    // 飞行效果（返回 Holder<MobEffect>）
     public static final Holder<MobEffect> FLIGHT_EFFECT = Registry.registerForHolder(
             BuiltInRegistries.MOB_EFFECT,
             ResourceLocation.fromNamespaceAndPath("bsp", "flight"),
@@ -46,8 +44,9 @@ public class FlightPotionMod implements ModInitializer {
                     return true;
                 }
 
+                // 使用兼容 1.21.1 的四参数方法
                 @Override
-                public void onMobRemoved(LivingEntity entity, int amplifier, MobEffectRemovalReason reason) {
+                public void onEffectRemoved(LivingEntity entity, int amplifier, boolean ambient, boolean showParticles) {
                     if (entity instanceof Player player && !player.isCreative() && !player.isSpectator()) {
                         player.getAbilities().mayfly = false;
                         player.getAbilities().flying = false;
@@ -55,12 +54,11 @@ public class FlightPotionMod implements ModInitializer {
                         player.fallDistance = 0.0F;
                         player.onUpdateAbilities();
                     }
-                    super.onMobRemoved(entity, amplifier, reason);
+                    super.onEffectRemoved(entity, amplifier, ambient, showParticles);
                 }
             }
     );
 
-    // 四种飞行药水（返回 Holder<Potion>）
     public static final Holder<Potion> FLIGHT_POTION = Registry.registerForHolder(
             BuiltInRegistries.POTION,
             ResourceLocation.fromNamespaceAndPath("bsp", "flight_potion"),
@@ -87,7 +85,6 @@ public class FlightPotionMod implements ModInitializer {
 
     @Override
     public void onInitialize() {
-        // 直接传入 Holder<Potion>，这是 1.21.1 支持的签名
         PotionBrewing.addMix(Potions.AWKWARD, Items.NETHER_STAR, FLIGHT_POTION);
         PotionBrewing.addMix(FLIGHT_POTION, Items.REDSTONE, LONG_FLIGHT_POTION);
         PotionBrewing.addMix(FLIGHT_POTION, Items.GLOWSTONE_DUST, STRONG_FLIGHT_POTION);
