@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "id": "bspmod",
+  "version": "${version}",
+  "name": "Flight Potion Mod",
+  "description": "Adds a craftable Flight Potion",
+  "authors": ["BSP studio"],
+  "license": "All Rights Reserved",
+  "environment": "*",
+  "entrypoints": {
+    "main": ["com.flightpotion.fabric.FlightPotionFabric"]
+  },
+  "mixin": ["flightpotion.mixins.json"],
+  "depends": {
+    "fabricloader": ">=0.16.9",
+    "minecraft": ">=1.21.9",
+    "fabric-api": "*"
+  }
+}
