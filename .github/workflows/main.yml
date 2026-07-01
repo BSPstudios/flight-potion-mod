@@ -1,10 +1,13 @@
-name: Build Mod
+name: Build MultiLoader
 
 on: [push, workflow_dispatch]
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        loader: [fabric, forge, neoforge]
     steps:
     - uses: actions/checkout@v4
     - name: Set up JDK 21
@@ -15,11 +18,11 @@ jobs:
     - name: Setup Gradle
       uses: gradle/actions/setup-gradle@v3
       with:
-        gradle-version: '8.10.2'   # 兼容 JDK 21 的稳定版本
-    - name: Build
-      run: gradle build
+        gradle-version: '8.10.2'
+    - name: Build ${{ matrix.loader }}
+      run: ./gradlew :${{ matrix.loader }}:build
     - name: Upload artifact
       uses: actions/upload-artifact@v4
       with:
-        name: FlightPotion
-        path: build/libs/
+        name: FlightPotion-${{ matrix.loader }}
+        path: ${{ matrix.loader }}/build/libs/
