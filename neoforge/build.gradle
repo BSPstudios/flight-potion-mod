@@ -1,0 +1,18 @@
+plugins {
+    id 'net.neoforged.gradle.userdev' version '7.0.145'
+}
+
+dependencies {
+    implementation "net.neoforged:neoforge:${project.neoforge_version}"
+    implementation project(':common')
+}
+
+runs {
+    client { systemProperty 'neoforge.enabledGameTestNamespaces', 'bspmod' }
+    server { systemProperty 'neoforge.enabledGameTestNamespaces', 'bspmod' }
+}
+
+processResources {
+    inputs.property "version", project.version
+    filesMatching("META-INF/neoforge.mods.toml") { expand "version": project.version }
+}
