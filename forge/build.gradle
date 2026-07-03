@@ -7,9 +7,13 @@ dependencies {
     implementation project(':common')
 }
 
-mappings channel: 'official', version: project.mappings_version
+minecraft {
+    mappings channel: project.mappings_channel, version: project.mappings_version
+}
 
 processResources {
     inputs.property "version", project.version
-    filesMatching("META-INF/mods.toml") { expand "version": project.version }
+    filesMatching("META-INF/mods.toml") {
+        expand "version": project.version
+    }
 }
