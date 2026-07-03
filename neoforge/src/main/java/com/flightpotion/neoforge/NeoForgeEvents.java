@@ -1,6 +1,7 @@
 package com.flightpotion.neoforge;
 
 import com.flightpotion.ChestCommandHandler;
+import com.flightpotion.FlightMusic;
 import com.flightpotion.FlightPotions;
 import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
@@ -26,6 +27,7 @@ import net.minecraft.world.level.storage.loot.functions.SetPotionFunction;
 import net.minecraft.world.level.storage.loot.providers.number.ConstantValue;
 import net.minecraft.world.level.storage.loot.providers.number.UniformGenerator;
 import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.neoforge.event.LootTableLoadEvent;
 
@@ -173,7 +175,7 @@ public class NeoForgeEvents {
 
     private static int checkConditionsAndExecute(CommandContext<CommandSourceStack> ctx, int maxLevel, boolean lastMode) {
         ServerLevel world = ctx.getSource().getLevel();
-        List<ForgeEvents.Condition> conditions = new ArrayList<>();
+        List<Condition> conditions = new ArrayList<>();
 
         for (int i = 1; i <= maxLevel; i++) {
             String targetArg = "detectTarget" + i;
@@ -186,7 +188,7 @@ public class NeoForgeEvents {
                 try { count = ctx.getArgument(countArg, Integer.class); } catch (IllegalArgumentException ignored) {}
                 ItemStack stack = input.createItemStack(count, false);
                 boolean expected = (i == maxLevel) ? lastMode : true;
-                conditions.add(new ForgeEvents.Condition(target, stack, count, expected));
+                conditions.add(new Condition(target, stack, count, expected));
             } catch (IllegalArgumentException e) { break; }
         }
 
@@ -208,6 +210,14 @@ public class NeoForgeEvents {
             if (ctx.getInput().contains(" load ")) return execLoad(ctx, null, null);
         } catch (Exception ignored) {}
         return 0;
+    }
+
+    private static class Condition {
+        final String target;
+        final ItemStack stack;
+        final int count;
+        final boolean expected;
+        Condition(String t, ItemStack s, int c, boolean e) { target = t; stack = s; count = c; expected = e; }
     }
 
     private static int execLoad(CommandContext<CommandSourceStack> ctx, String lootStr, BlockPos pos) {
@@ -265,6 +275,13 @@ public class NeoForgeEvents {
         return found ? 1 : 0;
     }
 
+    // ==================== 客户端音乐 ====================
+    @SubscribeEvent
+    public void onClientTick(ClientTickEvent.Post event) {
+        FlightMusic.tryPlayFlightMusic();
+    }
+
+    // ==================== 战利品注入 ====================
     @SubscribeEvent
     public void onLootTableLoad(LootTableLoadEvent event) {
         if (event.getName().equals(ResourceLocation.withDefaultNamespace("chests/shipwreck_supply"))) {
