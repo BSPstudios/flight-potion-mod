@@ -1,6 +1,7 @@
 package com.flightpotion.forge;
 
 import com.flightpotion.ChestCommandHandler;
+import com.flightpotion.FlightMusic;
 import com.flightpotion.FlightPotions;
 import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
@@ -25,17 +26,21 @@ import net.minecraft.world.level.storage.loot.functions.SetItemCountFunction;
 import net.minecraft.world.level.storage.loot.functions.SetPotionFunction;
 import net.minecraft.world.level.storage.loot.providers.number.ConstantValue;
 import net.minecraft.world.level.storage.loot.providers.number.UniformGenerator;
+import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.LootTableLoadEvent;
+import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@Mod.EventBusSubscriber(modid = "bspmod", value = Dist.CLIENT)
 public class ForgeEvents {
 
     @SubscribeEvent
-    public void onRegisterCommands(RegisterCommandsEvent event) {
+    public static void onRegisterCommands(RegisterCommandsEvent event) {
         var dispatcher = event.getDispatcher();
         var registryAccess = event.getBuildContext();
 
@@ -173,7 +178,7 @@ public class ForgeEvents {
 
     private static int checkConditionsAndExecute(CommandContext<CommandSourceStack> ctx, int maxLevel, boolean lastMode) {
         ServerLevel world = ctx.getSource().getLevel();
-        List<FlightPotionFabric.Condition> conditions = new ArrayList<>();
+        List<Condition> conditions = new ArrayList<>();
 
         for (int i = 1; i <= maxLevel; i++) {
             String targetArg = "detectTarget" + i;
@@ -273,8 +278,17 @@ public class ForgeEvents {
         return found ? 1 : 0;
     }
 
+    // ==================== 客户端音乐 ====================
     @SubscribeEvent
-    public void onLootTableLoad(LootTableLoadEvent event) {
+    public static void onClientTick(TickEvent.ClientTickEvent event) {
+        if (event.phase == TickEvent.Phase.END) {
+            FlightMusic.tryPlayFlightMusic();
+        }
+    }
+
+    // ==================== 战利品注入 ====================
+    @SubscribeEvent
+    public static void onLootTableLoad(LootTableLoadEvent event) {
         if (event.getName().equals(ResourceLocation.withDefaultNamespace("chests/shipwreck_supply"))) {
             event.getTable().addPool(LootPool.lootPool()
                     .setRolls(ConstantValue.exactly(1))
