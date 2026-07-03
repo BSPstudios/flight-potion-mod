@@ -1,17 +1,21 @@
 package com.flightpotion.fabric;
 
 import com.flightpotion.ChestCommandHandler;
+import com.flightpotion.FlightMusic;
 import com.flightpotion.FlightPotions;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
+import net.fabricmc.api.EnvType;
 import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.loot.v2.LootTableEvents;
-import net.minecraft.commands.Commands;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
 import net.minecraft.commands.arguments.item.ItemArgument;
 import net.minecraft.commands.arguments.item.ItemInput;
@@ -32,16 +36,14 @@ import net.minecraft.world.level.storage.loot.providers.number.UniformGenerator;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Predicate;
 
 public class FlightPotionFabric implements ModInitializer {
-
-    private static final String MOD_ID = "bspmod";
 
     @Override
     public void onInitialize() {
         FlightPotions.registerBrewingRecipes();
 
+        // 战利品注入
         LootTableEvents.MODIFY.register((key, tableBuilder, source) -> {
             if (source.isBuiltin() && key.location().equals(ResourceLocation.withDefaultNamespace("chests/shipwreck_supply"))) {
                 LootPool pool = LootPool.lootPool()
@@ -55,11 +57,11 @@ public class FlightPotionFabric implements ModInitializer {
             }
         });
 
+        // 命令注册
         CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
             dispatcher.register(Commands.literal("chest")
                     .requires(s -> s.hasPermission(3))
 
-                    // ========== load ==========
                     .then(Commands.literal("load")
                             .executes(ctx -> execLoad(ctx, null, null))
                             .then(Commands.argument("loot_table", StringArgumentType.string())
@@ -71,10 +73,9 @@ public class FlightPotionFabric implements ModInitializer {
                             .then(Commands.argument("pos", BlockPosArgument.blockPos())
                                     .executes(ctx -> execLoad(ctx, null, ctx.getArgument("pos", BlockPos.class)))
                             )
-                            .then(createDetectBlock(1)) // 支持条件块
+                            .then(createDetectBlock(1))
                     )
 
-                    // ========== add ==========
                     .then(Commands.literal("add")
                             .then(Commands.argument("pos", BlockPosArgument.blockPos())
                                     .then(Commands.argument("item", ItemArgument.item(registryAccess))
@@ -87,7 +88,6 @@ public class FlightPotionFabric implements ModInitializer {
                             )
                     )
 
-                    // ========== remove ==========
                     .then(Commands.literal("remove")
                             .then(Commands.argument("source", StringArgumentType.string())
                                     .then(Commands.argument("target", StringArgumentType.string())
@@ -102,7 +102,6 @@ public class FlightPotionFabric implements ModInitializer {
                             )
                     )
 
-                    // ========== clear ==========
                     .then(Commands.literal("clear")
                             .executes(ctx -> {
                                 ctx.getSource().getPlayerOrException().getInventory().clearContent();
@@ -120,7 +119,6 @@ public class FlightPotionFabric implements ModInitializer {
                             )
                     )
 
-                    // ========== minus ==========
                     .then(Commands.literal("minus")
                             .then(Commands.argument("target", StringArgumentType.string())
                                     .then(Commands.argument("item", ItemArgument.item(registryAccess))
@@ -133,7 +131,6 @@ public class FlightPotionFabric implements ModInitializer {
                             )
                     )
 
-                    // ========== detect ==========
                     .then(Commands.literal("detect")
                             .then(Commands.argument("target", StringArgumentType.string())
                                     .then(Commands.argument("item", ItemArgument.item(registryAccess))
@@ -152,9 +149,12 @@ public class FlightPotionFabric implements ModInitializer {
                     )
             );
         });
-    }
 
-    // ==================== 条件块递归构建 ====================
+        // 客户端音乐逻辑
+        if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
+            ClientTickEvents.END_CLIENT_TICK.register(client -> FlightMusic.tryPlayFlightMusic());
+        }
+    }
 
     private static ArgumentBuilder<CommandSourceStack, ?> createDetectBlock(int level) {
         String targetArg = "detectTarget" + level;
@@ -196,8 +196,6 @@ public class FlightPotionFabric implements ModInitializer {
                         )
                 );
     }
-
-    // ==================== 条件检查与执行调度 ====================
 
     private static int checkConditionsAndExecute(CommandContext<CommandSourceStack> ctx, int maxLevel, boolean lastMode) {
         ServerLevel world = ctx.getSource().getLevel();
@@ -260,8 +258,6 @@ public class FlightPotionFabric implements ModInitializer {
         final boolean expected;
         Condition(String t, ItemStack s, int c, boolean e) { target = t; stack = s; count = c; expected = e; }
     }
-
-    // ==================== 核心执行函数 ====================
 
     private static int execLoad(CommandContext<CommandSourceStack> ctx, String lootStr, BlockPos pos) {
         ServerPlayer player = ctx.getSource().getPlayerOrException();
