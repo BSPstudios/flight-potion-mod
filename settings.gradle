@@ -9,7 +9,7 @@ pluginManagement {
 
 rootProject.name = 'flight-potion-mod'
 
-include 'common'
+//include 'common'
 include 'fabric'
-include 'forge'
-include 'neoforge'
+//include 'forge'
+//include 'neoforge'
