@@ -1,4 +1,9 @@
+plugins {
+    id 'fabric-loom' version '1.7.2'
+}
+
 dependencies {
-    compileOnly "org.spongepowered:mixin:0.8.5"
-    compileOnly "net.minecraft:joined:${project.minecraft_version}-${project.mappings_version}"
+    minecraft "com.mojang:minecraft:${project.minecraft_version}"
+    mappings loom.officialMojangMappings()
+    // 注意：不添加任何 modImplementation，因为 common 只负责编译
 }
