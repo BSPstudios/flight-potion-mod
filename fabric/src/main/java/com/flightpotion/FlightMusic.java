@@ -18,7 +18,7 @@ import java.util.Random;
 public class FlightMusic {
     private static final Random RANDOM = new Random();
 
-    // 主世界 66.66% 概率使用的自定义音乐列表
+    // 主世界 1.61% 概率播放的自定义列表
     private static final List<ResourceLocation> FLIGHT_TRACKS = List.of(
         ResourceLocation.withDefaultNamespace("music/game/memories"),
         ResourceLocation.withDefaultNamespace("music/game/ebb"),
@@ -32,10 +32,13 @@ public class FlightMusic {
     private static final ResourceLocation PIGSTEP = ResourceLocation.withDefaultNamespace("music/game/pigstep");
     private static final ResourceLocation TEARS   = ResourceLocation.withDefaultNamespace("music/game/tears");
 
-    /**
-     * 在客户端 tick 中调用。当玩家拥有飞行效果且正在飞行时，
-     * 根据所在维度以不同概率播放指定音乐。
-     */
+    // 末地专用曲目（朋友翻唱版，需放入 assets/bspmod/sounds/music/end/ 下）
+    private static final List<ResourceLocation> END_TRACKS = List.of(
+        ResourceLocation.fromNamespaceAndPath("bspmod", "music/end/end_track1"),
+        ResourceLocation.fromNamespaceAndPath("bspmod", "music/end/end_track2"),
+        ResourceLocation.fromNamespaceAndPath("bspmod", "music/end/end_track3")
+    );
+
     public static void tryPlayFlightMusic() {
         Minecraft mc = Minecraft.getInstance();
         LocalPlayer player = mc.player;
@@ -50,7 +53,6 @@ public class FlightMusic {
         if (effect == null || !player.getAbilities().flying) return;
 
         SoundManager soundManager = mc.getSoundManager();
-        // 避免同时播放多首音乐
         if (soundManager.isActive(null)) return;
 
         // 主世界
@@ -83,7 +85,7 @@ public class FlightMusic {
                     0.0, 0.0, 0.0,
                     true
                 ));
-            } else if (roll < 0.14F) { // 0.07 + 0.07
+            } else if (roll < 0.14F) {
                 soundManager.play(new SimpleSoundInstance(
                     TEARS,
                     SoundSource.MUSIC,
@@ -95,8 +97,22 @@ public class FlightMusic {
                     true
                 ));
             }
-            // 其余情况由原版音乐接管
         }
-        // 其他维度（如末地）完全不干预，纯原版
+        // 末地：35% 概率播放翻唱曲目，否则原版音乐
+        else if (player.level().dimension() == Level.END) {
+            if (RANDOM.nextFloat() < 0.35F) {
+                ResourceLocation chosen = END_TRACKS.get(RANDOM.nextInt(END_TRACKS.size()));
+                soundManager.play(new SimpleSoundInstance(
+                    chosen,
+                    SoundSource.MUSIC,
+                    1.0F, 1.0F,
+                    RANDOM,
+                    false, 0,
+                    net.minecraft.client.resources.sounds.SoundInstance.Attenuation.NONE,
+                    0.0, 0.0, 0.0,
+                    true
+                ));
+            }
+        }
     }
 }
