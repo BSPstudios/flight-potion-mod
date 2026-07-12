@@ -1,0 +1,19 @@
+{
+  "effect.bspmod.flight": "飞行",
+  "item.minecraft.potion.effect.flight_potion": "飞行药水",
+  "item.minecraft.splash_potion.effect.flight_potion": "喷溅型飞行药水",
+  "item.minecraft.lingering_potion.effect.flight_potion": "滞留型飞行药水",
+  "item.minecraft.tipped_arrow.effect.flight_potion": "飞行药水箭",
+  "item.minecraft.potion.effect.long_flight_potion": "飞行药水",
+  "item.minecraft.splash_potion.effect.long_flight_potion": "喷溅型飞行药水",
+  "item.minecraft.lingering_potion.effect.long_flight_potion": "滞留型飞行药水",
+  "item.minecraft.tipped_arrow.effect.long_flight_potion": "飞行药水箭",
+  "item.minecraft.potion.effect.strong_flight_potion": "飞行药水",
+  "item.minecraft.splash_potion.effect.strong_flight_potion": "喷溅型飞行药水",
+  "item.minecraft.lingering_potion.effect.strong_flight_potion": "滞留型飞行药水",
+  "item.minecraft.tipped_arrow.effect.strong_flight_potion": "飞行药水箭",
+  "item.minecraft.potion.effect.long_strong_flight_potion": "飞行药水",
+  "item.minecraft.splash_potion.effect.long_strong_flight_potion": "喷溅型飞行药水",
+  "item.minecraft.lingering_potion.effect.long_strong_flight_potion": "滞留型飞行药水",
+  "item.minecraft.tipped_arrow.effect.long_strong_flight_potion": "飞行药水箭"
+}
