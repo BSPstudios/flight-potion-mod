@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "AAA",
+    "AFA",
+    "AAA"
+  ],
+  "key": {
+    "A": {
+      "item": "minecraft:arrow"
+    },
+    "F": {
+      "item": "minecraft:lingering_potion",
+      "potion": "bspmod:flight_potion"
+    }
+  },
+  "result": {
+    "item": "minecraft:tipped_arrow",
+    "count": 8,
+    "potion": "bspmod:flight_potion"
+  }
+}

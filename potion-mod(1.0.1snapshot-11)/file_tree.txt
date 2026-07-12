@@ -1,0 +1,48 @@
+flight-potion-mod/
+    .github/
+        workflows/
+            build.yml (新增 1 次, 修改 2 次)
+    fabric/
+        build.gradle (新增 1 次, 修改 3 次)
+        src/
+            main/
+                java/
+                    com/
+                        flightpotion/
+                            fabric/
+                                FlightPotionFabric.java (新增 1 次, 修改 6 次)
+                            mixin/
+                                SplashScreenMixin.java (新增 1 次, 修改 0 次)
+                                WitchMixin.java (新增 1 次, 修改 0 次)
+                            ChestCommandHandler.java (新增 1 次, 修改 1 次)
+                            FlightEffect.java (新增 1 次, 修改 1 次)
+                            FlightMusic.java (新增 1 次, 修改 6 次)
+                            FlightPotions.java (新增 1 次, 修改 1 次)
+                resources/
+                    assets/
+                        bspmod/
+                            lang/
+                                en_us.json (新增 1 次, 修改 0 次)
+                                zh_cn.json (新增 1 次, 修改 0 次)
+                            sounds/
+                                music/
+                                    end/
+                                        end_track1.ogg (新增 0 次, 修改 0 次)
+                                        end_track2.ogg (新增 0 次, 修改 0 次)
+                                        end_track3.ogg (新增 0 次, 修改 0 次)
+                            textures/
+                                gui/
+                                    logo.png (新增 1 次, 修改 0 次)
+                    data/
+                        bsp/
+                            recipes/
+                                tipped_arrow_flight.json (新增 1 次, 修改 0 次)
+                    fabric.mod.json (新增 1 次, 修改 3 次)
+                    flightpotion.mixins.json (新增 1 次, 修改 2 次)
+    gradle.properties (新增 1 次, 修改 1 次)
+    settings.gradle (新增 1 次, 修改 2 次)
+    build.gradle (新增 1 次, 修改 1 次)
+
+---------------------------------------------------
+
+总计：新增 19 次，修改 29 次（合计 48 次变更）
