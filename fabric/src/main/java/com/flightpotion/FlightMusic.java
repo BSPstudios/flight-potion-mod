@@ -55,7 +55,7 @@ public class FlightMusic {
 
         // 主世界
         if (player.level().dimension() == Level.OVERWORLD) {
-            if (RANDOM.nextFloat() < 0.6666F) {
+            if (RANDOM.nextFloat() < 0.0166F) {
                 ResourceLocation chosen = FLIGHT_TRACKS.get(RANDOM.nextInt(FLIGHT_TRACKS.size()));
                 soundManager.play(new SimpleSoundInstance(
                     chosen,
