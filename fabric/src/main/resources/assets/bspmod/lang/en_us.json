@@ -1,0 +1,19 @@
+{
+  "effect.bspmod.flight": "Flight",
+  "item.minecraft.potion.effect.flight_potion": "Potion of Flight",
+  "item.minecraft.splash_potion.effect.flight_potion": "Splash Potion of Flight",
+  "item.minecraft.lingering_potion.effect.flight_potion": "Lingering Potion of Flight",
+  "item.minecraft.tipped_arrow.effect.flight_potion": "Arrow of Flight",
+  "item.minecraft.potion.effect.long_flight_potion": "Potion of Flight",
+  "item.minecraft.splash_potion.effect.long_flight_potion": "Splash Potion of Flight",
+  "item.minecraft.lingering_potion.effect.long_flight_potion": "Lingering Potion of Flight",
+  "item.minecraft.tipped_arrow.effect.long_flight_potion": "Arrow of Flight",
+  "item.minecraft.potion.effect.strong_flight_potion": "Potion of Flight",
+  "item.minecraft.splash_potion.effect.strong_flight_potion": "Splash Potion of Flight",
+  "item.minecraft.lingering_potion.effect.strong_flight_potion": "Lingering Potion of Flight",
+  "item.minecraft.tipped_arrow.effect.strong_flight_potion": "Arrow of Flight",
+  "item.minecraft.potion.effect.long_strong_flight_potion": "Potion of Flight",
+  "item.minecraft.splash_potion.effect.long_strong_flight_potion": "Splash Potion of Flight",
+  "item.minecraft.lingering_potion.effect.long_strong_flight_potion": "Lingering Potion of Flight",
+  "item.minecraft.tipped_arrow.effect.long_strong_flight_potion": "Arrow of Flight"
+}
