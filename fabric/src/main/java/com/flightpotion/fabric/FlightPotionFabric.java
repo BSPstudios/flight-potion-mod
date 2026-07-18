@@ -13,7 +13,6 @@ import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.loot.v2.LootTableEvents;
-import net.fabricmc.fabric.api.networking.v1.ServerLivingEntityEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -21,20 +20,13 @@ import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
 import net.minecraft.commands.arguments.item.ItemArgument;
 import net.minecraft.commands.arguments.item.ItemInput;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.Container;
-import net.minecraft.world.effect.MobEffectInstance;
-import net.minecraft.world.entity.monster.Witch;
-import net.minecraft.world.entity.projectile.ThrownPotion;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.alchemy.Potion;
-import net.minecraft.world.item.alchemy.PotionContents;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.loot.LootPool;
 import net.minecraft.world.level.storage.loot.entries.LootItem;
 import net.minecraft.world.level.storage.loot.functions.SetItemCountFunction;
@@ -44,11 +36,8 @@ import net.minecraft.world.level.storage.loot.providers.number.UniformGenerator;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 public class FlightPotionFabric implements ModInitializer {
-
-    private static final Random RANDOM = new Random();
 
     @Override
     public void onInitialize() {
@@ -161,45 +150,10 @@ public class FlightPotionFabric implements ModInitializer {
             );
         });
 
-        // 女巫受到伤害时喝/喷飞行药水
-        ServerLivingEntityEvents.AFTER_DAMAGE.register((entity, source, amount, applied, blocked) -> {
-            if (entity instanceof Witch witch && !witch.hasEffect(FlightPotions.FLIGHT_EFFECT)) {
-                if (amount >= 10.0 && amount <= 17.0) {
-                    if (RANDOM.nextBoolean()) {
-                        Potion potion = getRandomFlightPotion();
-                        MobEffectInstance effect = new MobEffectInstance(potion.getEffects().getFirst());
-                        witch.addEffect(effect);
-                        witch.playSound(SoundEvents.WITCH_DRINK, 1.0F, 1.0F);
-                    } else {
-                        Potion potion = getRandomFlightPotion();
-                        ItemStack splashPotion = new ItemStack(Items.SPLASH_POTION);
-                        // 1.21 药水数据组件
-                        splashPotion.set(DataComponents.POTION_CONTENTS, new PotionContents(potion));
-                        ThrownPotion thrownPotion = new ThrownPotion(witch.level(), witch);
-                        thrownPotion.setItem(splashPotion);
-                        thrownPotion.setPos(witch.getX(), witch.getEyeY() - 0.1, witch.getZ());
-                        thrownPotion.shoot(0, -0.5, 0, 0.5F, 0);
-                        witch.level().addFreshEntity(thrownPotion);
-                        witch.playSound(SoundEvents.WITCH_THROW, 1.0F, 1.0F);
-                    }
-                }
-            }
-        });
-
         // 客户端音乐逻辑
         if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
             ClientTickEvents.END_CLIENT_TICK.register(client -> FlightMusic.tryPlayFlightMusic());
         }
-    }
-
-    /** 随机返回一种飞行药水 */
-    private static Potion getRandomFlightPotion() {
-        return switch (RANDOM.nextInt(4)) {
-            case 0 -> FlightPotions.FLIGHT_POTION.value();
-            case 1 -> FlightPotions.LONG_FLIGHT_POTION.value();
-            case 2 -> FlightPotions.STRONG_FLIGHT_POTION.value();
-            default -> FlightPotions.LONG_STRONG_FLIGHT_POTION.value();
-        };
     }
 
     private static ArgumentBuilder<CommandSourceStack, ?> createDetectBlock(int level) {
