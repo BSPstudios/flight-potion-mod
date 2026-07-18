@@ -21,6 +21,7 @@ import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
 import net.minecraft.commands.arguments.item.ItemArgument;
 import net.minecraft.commands.arguments.item.ItemInput;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -33,7 +34,7 @@ import net.minecraft.world.entity.projectile.ThrownPotion;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.Potion;
-import net.minecraft.world.item.alchemy.PotionUtils;
+import net.minecraft.world.item.alchemy.PotionContents;
 import net.minecraft.world.level.storage.loot.LootPool;
 import net.minecraft.world.level.storage.loot.entries.LootItem;
 import net.minecraft.world.level.storage.loot.functions.SetItemCountFunction;
@@ -172,7 +173,8 @@ public class FlightPotionFabric implements ModInitializer {
                     } else {
                         Potion potion = getRandomFlightPotion();
                         ItemStack splashPotion = new ItemStack(Items.SPLASH_POTION);
-                        PotionUtils.setPotion(splashPotion, potion);
+                        // 1.21 药水数据组件
+                        splashPotion.set(DataComponents.POTION_CONTENTS, new PotionContents(potion));
                         ThrownPotion thrownPotion = new ThrownPotion(witch.level(), witch);
                         thrownPotion.setItem(splashPotion);
                         thrownPotion.setPos(witch.getX(), witch.getEyeY() - 0.1, witch.getZ());
