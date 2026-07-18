@@ -21,13 +21,15 @@ import net.minecraft.commands.arguments.item.ItemArgument;
 import net.minecraft.commands.arguments.item.ItemInput;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.storage.loot.LootPool;
+import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.entries.LootItem;
 import net.minecraft.world.level.storage.loot.functions.SetItemCountFunction;
 import net.minecraft.world.level.storage.loot.functions.SetPotionFunction;
@@ -36,6 +38,7 @@ import net.minecraft.world.level.storage.loot.providers.number.UniformGenerator;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class FlightPotionFabric implements ModInitializer {
 
@@ -43,13 +46,12 @@ public class FlightPotionFabric implements ModInitializer {
     public void onInitialize() {
         FlightPotions.registerBrewingRecipes();
 
-        // 战利品注入
         LootTableEvents.MODIFY.register((key, tableBuilder, source) -> {
             if (source.isBuiltin() && key.location().equals(ResourceLocation.withDefaultNamespace("chests/shipwreck_supply"))) {
                 LootPool pool = LootPool.lootPool()
                         .setRolls(ConstantValue.exactly(1))
                         .add(LootItem.lootTableItem(Items.SPLASH_POTION)
-                                .apply(SetPotionFunction.setPotion(FlightPotions.FLIGHT_POTION.value()))
+                                .apply(SetPotionFunction.setPotion(FlightPotions.FLIGHT_POTION))
                                 .apply(SetItemCountFunction.setCount(UniformGenerator.between(1, 1)))
                                 .setWeight(1))
                         .build();
@@ -57,7 +59,6 @@ public class FlightPotionFabric implements ModInitializer {
             }
         });
 
-        // 命令注册
         CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
             dispatcher.register(Commands.literal("chest")
                     .requires(s -> s.hasPermission(3))
@@ -150,7 +151,6 @@ public class FlightPotionFabric implements ModInitializer {
             );
         });
 
-        // 客户端音乐逻辑
         if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
             ClientTickEvents.END_CLIENT_TICK.register(client -> FlightMusic.tryPlayFlightMusic());
         }
@@ -225,7 +225,6 @@ public class FlightPotionFabric implements ModInitializer {
         });
 
         if (!allPassed) return 0;
-
         return executeOriginalCommand(ctx);
     }
 
@@ -262,7 +261,7 @@ public class FlightPotionFabric implements ModInitializer {
     private static int execLoad(CommandContext<CommandSourceStack> ctx, String lootStr, BlockPos pos) {
         ServerPlayer player = ctx.getSource().getPlayerOrException();
         BlockPos target = (pos != null) ? pos : ChestCommandHandler.getLookedContainer(player);
-        ResourceLocation loot = (lootStr != null) ? ResourceLocation.tryParse(lootStr) : null;
+        ResourceKey<LootTable> loot = lootStr != null ? ResourceKey.create(net.minecraft.core.registries.Registries.LOOT_TABLE, ResourceLocation.tryParse(lootStr)) : null;
         int res = ChestCommandHandler.refreshContainer(player.serverLevel(), target, loot);
         ctx.getSource().sendSuccess(() -> Component.literal("操作完成"), true);
         return res >= 0 ? 1 : 0;
