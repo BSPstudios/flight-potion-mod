@@ -1,10 +1,9 @@
 package com.flightpotion.screen;
 
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.components.Button;
 import net.minecraft.network.chat.Component;
-import com.mojang.blaze3d.vertex.PoseStack;
 
 public class CreditsScreen extends Screen {
     private final Screen parent;
@@ -26,13 +25,8 @@ public class CreditsScreen extends Screen {
         this.renderBackground(graphics, mouseX, mouseY, delta);
         super.render(graphics, mouseX, mouseY, delta);
 
-        PoseStack pose = graphics.pose();
-        pose.pushPose();
-        pose.scale(2.0F, 2.0F, 1.0F);
-        graphics.drawCenteredString(this.font, "盒芒拌凉屎工作室",
-                (int) (this.width / 2 / 2.0F), (int) (40 / 2.0F), 0x55FF55);
-        pose.popPose();
-
+        // 1.21.9 中 drawCenteredString 参数有变化，这里暂时保留但可能需要调整
+        graphics.drawCenteredString(this.font, "盒芒拌凉屎工作室", this.width / 2, 40, 0x55FF55);
         graphics.drawCenteredString(this.font, "感谢名单", this.width / 2, 70, 0xFFFFFF);
         graphics.drawCenteredString(this.font, "葱油拌面", this.width / 2, 90, 0xCCCCCC);
         graphics.drawCenteredString(this.font, "曹杰", this.width / 2, 110, 0xCCCCCC);
