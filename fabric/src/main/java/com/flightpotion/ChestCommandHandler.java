@@ -1,39 +1,49 @@
 package com.flightpotion;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.ChestBlockEntity;
+import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.LootTable;
-import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
 
+import java.util.Optional;
 import java.util.function.Predicate;
 
 public class ChestCommandHandler {
 
-    public static int refreshContainer(ServerLevel world, BlockPos pos, ResourceLocation lootTable) {
+    public static int refreshContainer(ServerLevel world, BlockPos pos, ResourceKey<LootTable> lootKey) {
         BlockEntity be = world.getBlockEntity(pos);
         if (!(be instanceof Container container)) return -1;
-        if (lootTable == null && be instanceof ChestBlockEntity chest) {
-            lootTable = chest.getLootTable();
+
+        if (lootKey == null && be instanceof ChestBlockEntity chest) {
+            lootKey = chest.getLootTable();
         }
-        if (lootTable == null) {
+
+        if (lootKey == null) {
             container.clearContent();
             be.setChanged();
             world.sendBlockUpdated(pos, world.getBlockState(pos), world.getBlockState(pos), 3);
             return 0;
         }
+
         container.clearContent();
-        LootTable table = world.getServer().getLootData().getLootTable(lootTable);
-        LootContext ctx = new LootContext.Builder(world)
-                .withRandom(world.random)
+        Optional<LootTable> tableOpt = world.getServer().reloadableRegistries().getLootTable(lootKey);
+        if (tableOpt.isEmpty()) return -1;
+        LootTable table = tableOpt.get();
+        LootParams params = new LootParams.Builder(world)
+                .withParameter(LootContextParams.ORIGIN, pos.getCenter())
                 .create(LootContextParamSets.CHEST);
-        table.fill(container, ctx);
+        table.fill(container, params, world.getSeed());
         be.setChanged();
         world.sendBlockUpdated(pos, world.getBlockState(pos), world.getBlockState(pos), 3);
         return 1;
@@ -108,7 +118,10 @@ public class ChestCommandHandler {
     }
 
     public static BlockPos getLookedContainer(net.minecraft.world.entity.player.Player player) {
-        var hit = player.pick(5, 0, false);
-        return hit.getBlockPos();
+        HitResult hit = player.pick(5, 0, false);
+        if (hit.getType() == HitResult.Type.BLOCK) {
+            return ((BlockHitResult) hit).getBlockPos();
+        }
+        return player.blockPosition();
     }
 }
