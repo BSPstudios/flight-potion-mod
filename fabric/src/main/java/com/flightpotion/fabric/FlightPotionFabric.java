@@ -6,6 +6,7 @@ import com.flightpotion.FlightPotions;
 import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
+import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.ModInitializer;
@@ -165,7 +166,7 @@ public class FlightPotionFabric implements ModInitializer {
                 if (amount >= 10.0 && amount <= 17.0) {
                     if (RANDOM.nextBoolean()) {
                         Potion potion = getRandomFlightPotion();
-                        MobEffectInstance effect = new MobEffectInstance(potion.getEffects().get(0));
+                        MobEffectInstance effect = new MobEffectInstance(potion.getEffects().getFirst());
                         witch.addEffect(effect);
                         witch.playSound(SoundEvents.WITCH_DRINK, 1.0F, 1.0F);
                     } else {
