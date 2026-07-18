@@ -18,11 +18,7 @@ public class FlightEffect extends MobEffect {
                 player.onUpdateAbilities();
             }
             player.fallDistance = 0.0F;
-            if (player.isSprinting()) {
-                player.getAbilities().setFlyingSpeed(0.25F);
-            } else {
-                player.getAbilities().setFlyingSpeed(0.15F);
-            }
+            player.getAbilities().setFlyingSpeed(player.isSprinting() ? 0.25F : 0.15F);
         }
         return true;
     }
@@ -33,7 +29,7 @@ public class FlightEffect extends MobEffect {
     }
 
     @Override
-    public void onEffectRemoved(LivingEntity entity, int amplifier, boolean ambient, boolean showParticles) {
+    public void onEffectRemoved(LivingEntity entity, int amplifier) {
         if (entity instanceof Player player && !player.isCreative() && !player.isSpectator()) {
             player.getAbilities().mayfly = false;
             player.getAbilities().flying = false;
@@ -41,6 +37,5 @@ public class FlightEffect extends MobEffect {
             player.fallDistance = 0.0F;
             player.onUpdateAbilities();
         }
-        super.onEffectRemoved(entity, amplifier, ambient, showParticles);
     }
 }
