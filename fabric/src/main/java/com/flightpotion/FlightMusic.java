@@ -11,8 +11,11 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.boss.enderdragon.EndCrystal;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.phys.AABB;
 
 import java.util.List;
 
@@ -31,6 +34,8 @@ public class FlightMusic {
 
     private static final ResourceLocation CITECHO_VOID =
             ResourceLocation.fromNamespaceAndPath("bsp", "music/end/citecho_void");
+    private static final ResourceLocation OBSID_ECHO =
+            ResourceLocation.fromNamespaceAndPath("bsp", "music/end/obsid_echo");
 
     public static void tryPlayFlightMusic() {
         Minecraft mc = Minecraft.getInstance();
@@ -74,14 +79,40 @@ public class FlightMusic {
                         0.0, 0.0, 0.0, true
                 ));
             }
-        } else if (player.level().dimension() == Level.END && isInEndCity(player)) {
-            soundManager.play(new SimpleSoundInstance(
-                    CITECHO_VOID, SoundSource.MUSIC, 1.0F, 1.0F,
-                    player.level().random, false, 0,
-                    SimpleSoundInstance.Attenuation.NONE,
-                    0.0, 0.0, 0.0, true
-            ));
+        } else if (player.level().dimension() == Level.END) {
+            if (isInEndCity(player)) {
+                soundManager.play(new SimpleSoundInstance(
+                        CITECHO_VOID, SoundSource.MUSIC, 1.0F, 1.0F,
+                        player.level().random, false, 0,
+                        SimpleSoundInstance.Attenuation.NONE,
+                        0.0, 0.0, 0.0, true
+                ));
+            } else if (isNearObsidianPillar(player)) {
+                soundManager.play(new SimpleSoundInstance(
+                        OBSID_ECHO, SoundSource.MUSIC, 1.0F, 1.0F,
+                        player.level().random, false, 0,
+                        SimpleSoundInstance.Attenuation.NONE,
+                        0.0, 0.0, 0.0, true
+                ));
+            }
+            // 否则原版音乐自动播放
         }
+    }
+
+    /** 攻击末地水晶时调用，播放 Obsid Echo */
+    public static void triggerObsidEcho() {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.player == null) return;
+        SoundManager soundManager = mc.getSoundManager();
+        soundManager.play(new SimpleSoundInstance(
+                OBSID_ECHO,
+                SoundSource.MUSIC,
+                1.0F, 1.0F,
+                mc.player.level().random,
+                false, 0,
+                SimpleSoundInstance.Attenuation.NONE,
+                0.0, 0.0, 0.0, true
+        ));
     }
 
     private static boolean isInEndCity(LocalPlayer player) {
@@ -96,5 +127,12 @@ public class FlightMusic {
             }
         }
         return false;
+    }
+
+    private static boolean isNearObsidianPillar(LocalPlayer player) {
+        // 检测附近是否有末地水晶实体
+        AABB area = player.getBoundingBox().inflate(32);
+        List<EndCrystal> crystals = player.level().getEntitiesOfClass(EndCrystal.class, area);
+        return !crystals.isEmpty();
     }
 }
