@@ -25,8 +25,7 @@ public class CreditsScreen extends Screen {
         this.renderBackground(graphics, mouseX, mouseY, delta);
         super.render(graphics, mouseX, mouseY, delta);
 
-        // 1.21.9 中 drawCenteredString 参数有变化，这里暂时保留但可能需要调整
-        graphics.drawCenteredString(this.font, "盒芒拌凉屎工作室", this.width / 2, 40, 0x55FF55);
+        graphics.drawCenteredString(this.font, "盒芒拌凉屎工作室", this.width / 2, 40, 0x62D607);
         graphics.drawCenteredString(this.font, "感谢名单", this.width / 2, 70, 0xFFFFFF);
         graphics.drawCenteredString(this.font, "葱油拌面", this.width / 2, 90, 0xCCCCCC);
         graphics.drawCenteredString(this.font, "曹杰", this.width / 2, 110, 0xCCCCCC);
