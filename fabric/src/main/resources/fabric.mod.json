@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "id": "bspmod",
-  "version": "${version}",
-  "name": "Flight Potion Mod",
+  "version": "1.0.1snapshot12",
+  "name": "BSP's potion mod",
   "description": "Adds a craftable Flight Potion",
-  "authors": ["BSP studio"],
+  "authors": ["BSPstudios"],
   "license": "All Rights Reserved",
   "environment": "*",
   "entrypoints": {
