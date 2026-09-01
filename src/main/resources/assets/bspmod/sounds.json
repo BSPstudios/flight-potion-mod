@@ -1,0 +1,22 @@
+{
+  "swap-morning-sunshine": {"sounds": [{"name": "bspmod:swap-morning-sunshine", "stream": true}]},
+  "shining-end-stone": {"sounds": [{"name": "bspmod:shining-end-stone", "stream": true}]},
+  "echo-of-the-end": {"sounds": [{"name": "bspmod:echo-of-the-end", "stream": true}]},
+  "dragon-split": {"sounds": [{"name": "bspmod:dragon-split", "stream": true}]},
+  "end-stone-piece": {"sounds": [{"name": "bspmod:end-stone-piece", "stream": true}]},
+  "copper-forest": {"sounds": [{"name": "bspmod:copper-forest", "stream": true}]},
+  "voids-lament": {"sounds": [{"name": "bspmod:voids-lament", "stream": true}]},
+  "purple-coneflower": {"sounds": [{"name": "bspmod:purple-coneflower", "stream": true}]},
+  "citecho-void": {"sounds": [{"name": "bspmod:citecho-void", "stream": true}]},
+  "obsid-echo": {"sounds": [{"name": "bspmod:obsid-echo", "stream": true}]},
+  "triky-glom": {"sounds": [{"name": "bspmod:triky-glom", "stream": true}]},
+  "triky-glom-2": {"sounds": [{"name": "bspmod:triky-glom-2", "stream": true}]},
+  "triky-glom-3": {"sounds": [{"name": "bspmod:triky-glom-3", "stream": true}]},
+  "village-sunset": {"sounds": [{"name": "bspmod:village-sunset", "stream": true}]},
+  "lightly-lash-cave": {"sounds": [{"name": "bspmod:lightly-lash-cave", "stream": true}]},
+  "drip-drop-cave": {"sounds": [{"name": "bspmod:drip-drop-cave", "stream": true}]},
+  "oak-track": {"sounds": [{"name": "bspmod:oak-track", "stream": true}]},
+  "buzzle-bees": {"sounds": [{"name": "bspmod:buzzle-bees", "stream": true}]},
+  "dragonrend-anthem": {"sounds": [{"name": "bspmod:dragonrend-anthem", "stream": true}]},
+  "voidcry-crescendo": {"sounds": [{"name": "bspmod:voidcry-crescendo", "stream": true}]}
+}
