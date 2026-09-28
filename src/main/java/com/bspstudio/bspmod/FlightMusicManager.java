@@ -29,6 +29,36 @@ public class FlightMusicManager {
     private static final int CHECK_INTERVAL = 40;
     private static int tickCounter = 0;
 
+    /** 技术音效名 -> 友好歌名（用于音乐弹窗显示） */
+    private static final Map<String, String> TRACK_DISPLAY_NAMES = new HashMap<>();
+    static {
+        TRACK_DISPLAY_NAMES.put("swap-morning-sunshine", "Swap Morning Sunshine");
+        TRACK_DISPLAY_NAMES.put("shining-end-stone", "Shining End Stone");
+        TRACK_DISPLAY_NAMES.put("echo-of-the-end", "Echo of the End");
+        TRACK_DISPLAY_NAMES.put("dragon-split", "Dragon Split");
+        TRACK_DISPLAY_NAMES.put("end-stone-piece", "End Stone Piece");
+        TRACK_DISPLAY_NAMES.put("copper-forest", "Copper Forest");
+        TRACK_DISPLAY_NAMES.put("voids-lament", "Void's Lament");
+        TRACK_DISPLAY_NAMES.put("purple-coneflower", "Purple Coneflower");
+        TRACK_DISPLAY_NAMES.put("citecho-void", "Citecho Void");
+        TRACK_DISPLAY_NAMES.put("obsid-echo", "Obsid Echo");
+        TRACK_DISPLAY_NAMES.put("triky-glom", "Triky Glom");
+        TRACK_DISPLAY_NAMES.put("triky-glom-2", "Triky Glom 2");
+        TRACK_DISPLAY_NAMES.put("triky-glom-3", "Triky Glom 3");
+        TRACK_DISPLAY_NAMES.put("village-sunset", "Village Sunset");
+        TRACK_DISPLAY_NAMES.put("lightly-lash-cave", "Lightly Lash Cave");
+        TRACK_DISPLAY_NAMES.put("drip-drop-cave", "Drip Drop Cave");
+        TRACK_DISPLAY_NAMES.put("oak-track", "Oak Track");
+        TRACK_DISPLAY_NAMES.put("buzzle-bees", "Buzzle Bees");
+        TRACK_DISPLAY_NAMES.put("dragonrend-anthem", "Dragonrend Anthem");
+        TRACK_DISPLAY_NAMES.put("voidcry-crescendo", "Voidcry Crescendo");
+    }
+
+    private static String friendlyName(String path) {
+        String n = TRACK_DISPLAY_NAMES.get(path);
+        return n != null ? n : path;
+    }
+
     public static void tick() {
         Minecraft mc = Minecraft.getInstance();
         LocalPlayer player = mc.player;
@@ -152,10 +182,10 @@ public class FlightMusicManager {
         mc.getMusicManager().stopPlaying();
         currentTrack = new FlightMusicInstance(sound);
         mc.getSoundManager().play(currentTrack);
-        // 音乐弹窗：显示作者
+        // 音乐弹窗：显示作者 + 歌名
         if (EasterEggConfig.isMusicToastEnabled()) {
             mc.gui.setTitle(Component.literal("BSP Studios"));
-            mc.gui.setSubtitle(Component.literal(sound.location().getPath()));
+            mc.gui.setSubtitle(Component.literal(friendlyName(sound.location().getPath())));
         }
     }
 

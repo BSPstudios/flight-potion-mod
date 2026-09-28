@@ -5,11 +5,13 @@
   "mixins": [
     "MixinPlayer",
     "MixinServerPlayer",
-    "MixinInventory"
+    "MixinMaceItem",
+    "MixinBrewingStandBlockEntity"
   ],
   "client": [
     "MixinOptionsScreen",
     "MixinScreen",
+    "MixinVideoSettingsScreen",
     "MixinMusicManager",
     "MixinMultiPlayerGameMode",
     "MixinJukeboxSongPlayer"

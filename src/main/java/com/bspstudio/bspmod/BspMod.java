@@ -1,6 +1,7 @@
 package com.bspstudio.bspmod;
 
 import java.util.*;
+import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -9,6 +10,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -34,6 +36,8 @@ import net.minecraft.world.level.storage.loot.providers.number.ConstantValue;
 import net.minecraft.world.level.storage.loot.providers.number.UniformGenerator;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import net.fabricmc.fabric.api.loot.v3.LootTableEvents;
 import net.fabricmc.fabric.api.registry.FabricBrewingRecipeRegistryBuilder;
 
@@ -41,8 +45,11 @@ public class BspMod implements ModInitializer {
     public static final String MOD_ID = "bspmod";
 
     public static Holder<MobEffect> FLIGHT_EFFECT;
+    public static Holder<MobEffect> ANTIDOTE_EFFECT;
     public static Holder<Potion> FLIGHT_POTION;
     public static Holder<Potion> LONG_FLIGHT;
+    public static Holder<Potion> ANTIDOTE;
+    public static Holder<Potion> LONG_ANTIDOTE;
     public static Map<String, SoundEvent> FLIGHT_MUSIC_MAP = new HashMap<>();
 
     /** 22# 唱片（音乐唱片）物品 */
@@ -65,10 +72,22 @@ public class BspMod implements ModInitializer {
 
     @Override
     public void onInitialize() {
+        // 注册建筑者与工作者实体
+        com.bspstudio.bspmod.builder.BspModEntities.register();
+        com.bspstudio.bspmod.builder.BuilderCommands.registerCommands();
+        com.bspstudio.bspmod.builder.BuilderChatHandler.register();
+
         FLIGHT_EFFECT = Registry.registerForHolder(
                 BuiltInRegistries.MOB_EFFECT,
                 ResourceLocation.fromNamespaceAndPath(MOD_ID, "flight"),
                 new FlightEffect()
+        );
+
+        // 1.2 时代：解毒（防中毒）效果，灰色，效果期间免疫中毒
+        ANTIDOTE_EFFECT = Registry.registerForHolder(
+                BuiltInRegistries.MOB_EFFECT,
+                ResourceLocation.fromNamespaceAndPath(MOD_ID, "antidote"),
+                new AntidoteEffect()
         );
 
         FLIGHT_POTION = Registry.registerForHolder(
@@ -83,6 +102,19 @@ public class BspMod implements ModInitializer {
                 new Potion("long_flight_potion", new MobEffectInstance(FLIGHT_EFFECT, 18000))
         );
 
+        // 1.2 时代：防中毒药水（普通 + 延长），效果「解毒」
+        ANTIDOTE = Registry.registerForHolder(
+                BuiltInRegistries.POTION,
+                ResourceLocation.fromNamespaceAndPath(MOD_ID, "antidote"),
+                new Potion("antidote", new MobEffectInstance(ANTIDOTE_EFFECT, 3600))
+        );
+
+        LONG_ANTIDOTE = Registry.registerForHolder(
+                BuiltInRegistries.POTION,
+                ResourceLocation.fromNamespaceAndPath(MOD_ID, "long_antidote"),
+                new Potion("long_antidote", new MobEffectInstance(ANTIDOTE_EFFECT, 7200))
+        );
+
         FabricBrewingRecipeRegistryBuilder.BUILD.register(builder -> {
             builder.registerPotionRecipe(
                     Potions.AWKWARD,
@@ -93,6 +125,29 @@ public class BspMod implements ModInitializer {
                     FLIGHT_POTION,
                     Ingredient.of(Items.REDSTONE),
                     LONG_FLIGHT
+            );
+            // 防中毒药水：粗制的药水 + 奶桶
+            builder.registerPotionRecipe(
+                    Potions.AWKWARD,
+                    Ingredient.of(Items.MILK_BUCKET),
+                    ANTIDOTE
+            );
+            builder.registerPotionRecipe(
+                    ANTIDOTE,
+                    Ingredient.of(Items.REDSTONE),
+                    LONG_ANTIDOTE
+            );
+            // 1.2.2：防中毒药水 + 发酵蛛眼 → 中毒药水（腐化）
+            builder.registerPotionRecipe(
+                    ANTIDOTE,
+                    Ingredient.of(Items.FERMENTED_SPIDER_EYE),
+                    Potions.POISON
+            );
+            // 1.2.3：延长防中毒药水 + 发酵蛛眼 → 延长中毒药水
+            builder.registerPotionRecipe(
+                    LONG_ANTIDOTE,
+                    Ingredient.of(Items.FERMENTED_SPIDER_EYE),
+                    Potions.LONG_POISON
             );
         });
 
@@ -137,6 +192,15 @@ public class BspMod implements ModInitializer {
         );
 
         registerShulkerDrop();
+        registerEndCityFlyCheck();
+
+        // 把 22# 唱片加入创造模式「工具与实用物品」物品栏，否则玩家物品栏里看不到
+        ItemGroupEvents.modifyEntriesEvent(
+                ResourceKey.create(Registries.CREATIVE_MODE_TAB,
+                        ResourceLocation.withDefaultNamespace("tools_and_utilities"))
+        ).register(entries -> {
+            entries.accept(DISC_22);
+        });
     }
 
     /** 22# 唱片掉落：在飞行效果下用重锤击杀潜影贝，16% 概率掉落 */
@@ -157,6 +221,38 @@ public class BspMod implements ModInitializer {
                 if (entity.level() instanceof ServerLevel serverLevel) {
                     entity.spawnAtLocation(serverLevel, new ItemStack(DISC_22));
                 }
+            }
+        });
+    }
+
+    /**
+     * 进度「末地城，我飞来啦」：获得 22# 唱片 且 从未穿过末地折跃门。
+     *
+     * 历史坑：原先挂在 Inventory.add(ItemStack) 的 Mixin 上，但创造模式物品栏
+     * 取出物品走的是 setItem(slot, stack)（/give 同样不经过 add），钩子根本不触发，
+     * 导致进度始终测不出来。改为每秒轮询体检，覆盖所有获取途径
+     * （掉落拾取 / give / 创造模式拿取 / 合成 / 箱子搬运）。
+     */
+    private void registerEndCityFlyCheck() {
+        ServerTickEvents.END_SERVER_TICK.register(server -> {
+            if (DISC_22 == null) return;
+            if (server.getTickCount() % 20 != 0) return; // 每秒一次，开销可忽略
+
+            ResourceLocation gateId = ResourceLocation.fromNamespaceAndPath("minecraft", "end/enter_end_gateway");
+            ResourceLocation advId = ResourceLocation.fromNamespaceAndPath(MOD_ID, "end/end_city_fly");
+            AdvancementHolder adv = server.getAdvancements().get(advId);
+            if (adv == null) return;
+
+            for (ServerPlayer player : server.getPlayerList().getPlayers()) {
+                // 未持有 22# 唱片 → 跳过
+                if (!player.getInventory().contains(s -> s.is(DISC_22))) continue;
+                // 已达成 → 跳过
+                if (player.getAdvancements().getOrStartProgress(adv).isDone()) continue;
+                // 已穿过末地折跃门 → 不授予
+                AdvancementHolder gate = server.getAdvancements().get(gateId);
+                if (gate != null && player.getAdvancements().getOrStartProgress(gate).isDone()) continue;
+
+                player.getAdvancements().award(adv, "disc_22");
             }
         });
     }
